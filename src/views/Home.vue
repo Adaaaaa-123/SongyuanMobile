@@ -5,19 +5,47 @@
       <van-tab title="处置中" name="1"></van-tab>
       <van-tab title="处置完" name="2"></van-tab>
     </van-tabs>
-    <div :class="{'item':true,'last':item==5}" v-for="item in 5" :key="item" >
-      <p>告警类型：三轮车</p>
-      <p>告警时间：2021-09-17 16:47:00</p>
-      <p>告警地址：松原市公安交警支队</p>
-      <p>签收状态：未签收</p>
+    <van-overlay :show="loading">
+      <van-loading type="spinner" color="#1989fa" />
+    </van-overlay>
+    <div
+      :class="{'item':true,'last':item==5}"
+      v-for="(item,index) in warnningList"
+      :key="item+index"
+    >
+      <p>告警类型：{{getCarType(item.carAlarm.vehicleClass)}}</p>
+      <p>告警时间：{{item.carAlarm.passTime.substr(0,19)}}</p>
+      <div style="display:flex">
+        <div style="width:93px">告警地址：</div>
+        <div>{{item.carAlarm.tollgateName}}</div>
+      </div>
+      <p v-if="params.statusCode!=2">签收状态：{{item.status?"已签收":"未签收"}}</p>
+      <p v-if="params.statusCode==2">是否误报：{{item.isDistort?"是":"否"}}</p>
       <div v-if="params.statusCode=='0'" class="mark"></div>
       <div v-if="params.statusCode=='1'" class="mark yellow"></div>
       <div v-if="params.statusCode=='2'" class="mark green"></div>
       <div class="btns">
         操作：
-        <van-button size="mini" v-if="params.statusCode=='1'" color="#363291" type="info">签收</van-button>
-        <van-button size="mini" v-if="params.statusCode=='1'" color="#363291" type="info">处置</van-button>
-        <van-button size="mini" v-if="params.statusCode=='1'" color="#363291" type="info">误报</van-button>
+        <van-button
+          size="mini"
+          v-if="params.statusCode=='1'&&!item.status"
+          color="#363291"
+          type="info"
+          @click="goReceipt(item.id)"
+        >签收</van-button>
+        <van-button
+          size="mini"
+          v-if="params.statusCode=='1'&&item.status"
+          color="#363291"
+          type="info"
+        >处置</van-button>
+        <van-button
+          size="mini"
+          v-if="params.statusCode=='1'&&item.status"
+          color="#363291"
+          type="info"
+          @click="goDistort(item.id)"
+        >误报</van-button>
         <van-button size="mini" color="#363291" type="info">查看图片</van-button>
       </div>
     </div>
@@ -25,26 +53,48 @@
 </template>
 
 <script>
-import { getList } from "@/api/home"
+import { Dialog } from 'vant'
+import { getList, distort, receipt } from "@/api/home";
 export default {
   data() {
     return {
-      params:{
-        carPositionId:'10',
-        statusCode:"0"
-      }
-
+      params: {
+        carPositionId: "20",
+        statusCode: "0"
+      },
+      warnningList: [],
+      loading: false
     };
   },
   created() {
-    this.getData()
+    this.getData();
   },
   mounted() {},
   methods: {
-      changeType(val){
-        console.log(val,'val');
-      },
-      getCarType(type) {
+    async goDistort(id) {
+      let res = await distort({ id });
+      if (res.code == 0) {
+        Dialog.alert({
+          title: "提示",
+          message: "操作成功！"
+        });
+        this.getData();
+      }
+    },
+    async goReceipt(id) {
+      let res = await receipt({ id });
+      if (res.code == 0) {
+        Dialog.alert({
+          title: "提示",
+          message: "操作成功！"
+        });
+        this.getData();
+      }
+    },
+    changeType(val) {
+      this.getData();
+    },
+    getCarType(type) {
       let current = "";
       if (
         (type.substr(0, 1) == "H" && type.substr(1) == 300) ||
@@ -70,42 +120,40 @@ export default {
       }
       return current;
     },
-    async getData(){
-      let res = await getList( {
-        carPositionId:'20',
-        statusCode:'0'
-      })
-      if(res.code==0){
-        console.log(res)
+    async getData() {
+      this.loading = true;
+      let res = await getList(this.params);
+      if (res.code == 0) {
+        this.warnningList = res.object;
       }
+      this.loading = false;
     }
   }
 };
 </script>
 
 <style scoped lang="scss">
-.home /deep/ .van-tabs__nav--card{
+.home /deep/ .van-tabs__nav--card {
   margin: 0;
 }
-.home /deep/ .van-tab.van-tab--active{
+.home /deep/ .van-tab.van-tab--active {
   background-color: #363291;
 }
-.home /deep/ .van-tabs__nav--card{
+.home /deep/ .van-tabs__nav--card {
   border-color: #363291;
 }
-.home /deep/ .van-tabs__nav--card .van-tab{
+.home /deep/ .van-tabs__nav--card .van-tab {
   border-color: #363291;
   color: #363291;
-  &.van-tab--active{
-  color: #fff;
+  &.van-tab--active {
+    color: #fff;
   }
- 
 }
-.home{
+.home {
   width: 100%;
   padding-bottom: 50px;
   background-color: #e1e0f1;
-  .item{
+  .item {
     position: relative;
     text-align: left;
     padding: 20px 40px;
@@ -115,7 +163,7 @@ export default {
     // &.last{
     //   border: none;
     // }
-    .mark{
+    .mark {
       position: absolute;
       right: 95px;
       top: 35px;
@@ -123,14 +171,14 @@ export default {
       height: 16px;
       border-radius: 50%;
       background-color: red;
-      &.yellow{
+      &.yellow {
         background-color: yellow;
       }
-       &.green{
+      &.green {
         background-color: green;
       }
     }
-    .btns{
+    .btns {
       display: flex;
       align-items: center;
     }
