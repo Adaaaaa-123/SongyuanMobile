@@ -15,9 +15,10 @@
     >
       <p>告警类型：{{getCarType(item.carAlarm.vehicleClass)}}</p>
       <p>告警时间：{{item.carAlarm.passTime.substr(0,19)}}</p>
-      <div style="display:flex">
+      <div class="address">
         <div style="width:93px">告警地址：</div>
         <div>{{item.carAlarm.tollgateName}}</div>
+        <div v-if="item.carAlarm.tollgateName" class="place" @click="goPlace(item.id)"></div>
       </div>
       <p v-if="params.statusCode!=2">签收状态：{{item.status?"已签收":"未签收"}}</p>
       <p v-if="params.statusCode==2">是否误报：{{item.isDistort?"是":"否"}}</p>
@@ -71,6 +72,14 @@ export default {
   },
   mounted() {},
   methods: {
+    goPlace(id){
+      this.$router.push({
+        path:'/place',
+        query:{
+          id
+        }
+      })
+    },
     async goDistort(id) {
       let res = await distort({ id });
       if (res.code == 0) {
@@ -163,6 +172,20 @@ export default {
     // &.last{
     //   border: none;
     // }
+    .address{
+      position: relative;
+      display: flex;
+      .place{
+        width: 18px;
+        height: 18px;
+        position: absolute;
+        top: 0;
+        right: -5px;
+        background: url(../assets/place.png) no-repeat center;
+        background-size: cover;
+        cursor: pointer;
+      }
+    }
     .mark {
       position: absolute;
       right: 95px;

@@ -31,19 +31,11 @@ export default {
 </script>
 <style lang="scss">
 
-html,body,#app {
+body,#app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  background-color: #e1e0f1;
+  background-color: #e1e0f1
 }
 
 #nav {

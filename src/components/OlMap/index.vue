@@ -2,7 +2,7 @@
   <div class="openlayer">
     <div id="map" ref="rootmap">
       <!-- 弹出窗体 -->
-      <MapPopup
+      <!-- <MapPopup
         :position="mapPopupData.position"
         :title="mapPopupData.title"
         :offset="mapPopupData.offset"
@@ -27,7 +27,7 @@
              <el-button type="primary" v-if="popupData.isHandle" @click="cancelHandle()">取消处置</el-button>
           </div>
         </div>
-      </MapPopup>
+      </MapPopup> -->
       <!-- 点标注，如果只想用文字标注label，可以把图片设置成一个像素的透明图片，如果只想用图标就label设置为null，单独的懒得封装了,-->
       <MapIconMark
         v-for="(item,index) in carList"
@@ -135,7 +135,7 @@ import MapCircle from "./MapCircle";
 import MapOverlay from "./MapOverlay";
 import MapPointCollection from "./MapPointCollection";
 import mapconfig from "@/config/mapconfig";
-import { findAllCar,alarmDispatch } from "@/api/earlyWarning";
+// import { findAllCar,alarmDispatch } from "@/api/earlyWarning";
 export default {
   name: "openlayer",
   components: {
@@ -242,7 +242,7 @@ export default {
       markList: [],
       mapData: null,
       mapCenter: [124.82, 45.13],
-      mapZoom: 8,
+      mapZoom: 10,
       // clickCenter: [0,0],
       popupText: "弹窗初始化文字",
       iconImg: require("@/assets/mark.png"), // 文件地址 String[url]
@@ -273,7 +273,7 @@ export default {
     this.initMap();
   },
   created() {
-    this.getCarList();
+    // this.getCarList();
   },
   methods: {
     cancelHandle() {
@@ -282,17 +282,17 @@ export default {
       this.mapPointCollectionData.pointlist = [];
       this.mapPopupClose();
     },
-    async getCarList() {
-      let res = await findAllCar();
-      if (res.code == 0) {
-        this.carList = res.object.map(x => {
-          return {
-            ...x,
-            postion: [x.lon, x.lat]
-          };
-        });
-      }
-    },
+    // async getCarList() {
+    //   let res = await findAllCar();
+    //   if (res.code == 0) {
+    //     this.carList = res.object.map(x => {
+    //       return {
+    //         ...x,
+    //         postion: [x.lon, x.lat]
+    //       };
+    //     });
+    //   }
+    // },
     initMap() {
       console.log("重新加载！ ");
       const mapContainer = this.$refs.rootmap;
@@ -399,19 +399,19 @@ export default {
       //   this.mapPopupData.position = this.mapIconData.position;
       // }
     },
-    async goHandle() {
-      // console.log(this.value.warningId,this.popupData);
-      let res = await alarmDispatch({
-        id:this.value.warningId,
-        carPositionId:this.popupData.id
-      })
-      if(res.code==0){
-        this.cancelHandle()
-        this.$emit("onSave")
-        this.getCarList()
-        this.$message.success("派警成功！");
-      }
-    },
+    // async goHandle() {
+    //   // console.log(this.value.warningId,this.popupData);
+    //   let res = await alarmDispatch({
+    //     id:this.value.warningId,
+    //     carPositionId:this.popupData.id
+    //   })
+    //   if(res.code==0){
+    //     this.cancelHandle()
+    //     this.$emit("onSave")
+    //     this.getCarList()
+    //     this.$message.success("派警成功！");
+    //   }
+    // },
     // 关闭弹出窗体事件
     mapPopupClose(e) {
       this.mapPopupData.show = false;

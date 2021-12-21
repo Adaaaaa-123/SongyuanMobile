@@ -7,7 +7,7 @@ export default {
   name: "BrokenLine",
   props: {
     value: Array,
-    text: String
+    text: Array
   },
   data() {
     return {
@@ -28,7 +28,7 @@ export default {
       this.dom = echarts.init(this.$refs.dom);
       let data = this.value ? this.value : [];
       let legends = data.map(x => x.name);
-      let colNames = ["1号", "2号", "3号", "4号", "5号", "6号"];
+      let colNames = this.text
       let seriesList = data.map(x => {
         return {
           name: x.name,

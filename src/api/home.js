@@ -29,6 +29,9 @@ export const receipt = params => {
     url: `/blbWarnCarRelation/receipt/${params.id}`,
     method: 'get',
     responseType: 'json',
-    params:{}
+    params
   });
 }
+
+
+

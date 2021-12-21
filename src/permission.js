@@ -8,7 +8,7 @@ import { Dialog } from 'vant'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/home','/set','/login','/total',] // no redirect whitelist
+const whiteList = ['/place','/home','/set','/login','/total',] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
   // start progress bar
