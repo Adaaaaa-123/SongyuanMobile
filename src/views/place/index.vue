@@ -2,7 +2,7 @@
   <div class="place">
     <div class="map-box">
       <div class="back" @click="goBack"></div>
-      <OlMap></OlMap>
+      <OlMap :value="value"></OlMap>
     </div>
   </div>
 </template>
@@ -16,15 +16,41 @@ export default {
     OlMap
   },
   data() {
-    return {};
+    return {
+      value: {
+        carList: [],
+        position: []
+      }
+    };
   },
   created() {
-    console.log("created");
+    // console.log("created");
   },
   mounted() {
-    console.log("mounted");
+    // // console.log("mounted");
+    // console.log(this.$route.query,'query');
+    this.getPlace();
   },
   methods: {
+    async getPlace() {
+      let res = await coord({
+        id: this.$route.query.id
+      });
+      if (res.code == 0) {
+        console.log(res, "返回值");
+        if (res.object.carLat && res.object.carLon) {
+          let arr = [];
+          arr.push([res.object.carLon, res.object.carLat]);
+          this.value.carList = arr;
+        }
+        if (res.object.tollgateLat && res.object.tollgateLon) {
+          let arr = [];
+          arr.push([res.object.tollgateLon, res.object.tollgateLat]);
+          this.value.position = arr;
+        }
+        console.log(this.value, "value");
+      }
+    },
     goBack() {
       this.$router.push("/home");
     }

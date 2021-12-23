@@ -16,7 +16,7 @@
       <p>告警类型：{{getCarType(item.carAlarm.vehicleClass)}}</p>
       <p>告警时间：{{item.carAlarm.passTime.substr(0,19)}}</p>
       <div class="address">
-        <div style="width:93px">告警地址：</div>
+        <div class="label">告警地址：</div>
         <div>{{item.carAlarm.tollgateName}}</div>
         <div v-if="item.carAlarm.tollgateName" class="place" @click="goPlace(item.id)"></div>
       </div>
@@ -39,6 +39,7 @@
           v-if="params.statusCode=='1'&&item.status"
           color="#363291"
           type="info"
+          @click="goFeedback(item)"
         >处置</van-button>
         <van-button
           size="mini"
@@ -47,14 +48,22 @@
           type="info"
           @click="goDistort(item.id)"
         >误报</van-button>
-        <van-button size="mini" color="#363291" type="info">查看图片</van-button>
+        <van-button
+          size="mini"
+          color="#363291"
+          type="info"
+          @click="viewPicture(item.carAlarm.storageUrl)"
+        >查看图片</van-button>
       </div>
     </div>
+    <van-image-preview v-model="show" :images="images" @onClose="closeView" @change="onChange">
+      <van-button type="warning" @click="go">误报</van-button>
+    </van-image-preview>
   </div>
 </template>
 
 <script>
-import { Dialog } from 'vant'
+import { Dialog } from "vant";
 import { getList, distort, receipt } from "@/api/home";
 export default {
   data() {
@@ -64,7 +73,9 @@ export default {
         statusCode: "0"
       },
       warnningList: [],
-      loading: false
+      loading: false,
+      images: [],
+      show: false
     };
   },
   created() {
@@ -72,23 +83,63 @@ export default {
   },
   mounted() {},
   methods: {
-    goPlace(id){
+    go(){
+
+    },
+    goFeedback(params){
       this.$router.push({
-        path:'/place',
-        query:{
-          id
-        }
+        name:"Feedback",
+        params
       })
     },
-    async goDistort(id) {
-      let res = await distort({ id });
-      if (res.code == 0) {
+    viewPicture(url) {
+      this.images = [];
+      console.log(url, "url");
+      if (!url) {
         Dialog.alert({
           title: "提示",
-          message: "操作成功！"
+          message: "暂无图片！"
         });
-        this.getData();
+      } else {
+        this.images = [url];
+        this.show = true;
       }
+    },
+    closeView() {
+      this.images = [];
+    },
+    onChange(index) {
+      console.log(index);
+    },
+    goPlace(id) {
+      this.$router.push({
+        path: "/place",
+        query: {
+          id
+        }
+      });
+    },
+    goDistort(id) {
+      Dialog.confirm({
+        title: "提示",
+        message: "确认误报吗"
+      })
+        .then(() => {
+          distort({ id })
+            .then(res => {
+              if (res.code == 0) {
+                Dialog.alert({
+                  title: "提示",
+                  message: "操作成功！"
+                });
+                this.getData();
+              }
+            })
+            .catch(error => {});
+        })
+        .catch(() => {
+          // on cancel
+        });
     },
     async goReceipt(id) {
       let res = await receipt({ id });
@@ -165,22 +216,25 @@ export default {
   .item {
     position: relative;
     text-align: left;
-    padding: 20px 40px;
+    padding: 20px 30px;
     font-size: 16px;
     font-weight: 400;
     border-bottom: 1px solid #5a6876;
     // &.last{
     //   border: none;
     // }
-    .address{
+    .address {
       position: relative;
       display: flex;
-      .place{
+      .label {
+        white-space: nowrap;
+      }
+      .place {
         width: 18px;
         height: 18px;
         position: absolute;
-        top: 0;
-        right: -5px;
+        top: 2px;
+        right: -15px;
         background: url(../assets/place.png) no-repeat center;
         background-size: cover;
         cursor: pointer;

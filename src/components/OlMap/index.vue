@@ -38,7 +38,7 @@
         :elementName="mapIconData.elementName"
         :className="mapIconData.className"
       ></MapIconMark>
-      <MapIconMark
+      <!-- <MapIconMark
         v-for="(item,index) in markList"
         :position="item"
         :key="item+index"
@@ -46,7 +46,7 @@
         :icon="mapPointCollectionData.bgImg"
         :elementName="mapIconData.elementName"
         :className="mapIconData.className"
-      ></MapIconMark>
+      ></MapIconMark> -->
       <!-- 折线 -->
       <!-- 多边形 -->
       <MapPolygon
@@ -86,15 +86,15 @@
         :zIndex="mapPointCollectionData.zIndex"
         :offset="mapPointCollectionData.offset"
       ></MapPointCollection>
-      <!-- <MapPointCollection
-        :bgImg="mapCarPointCollectionData.bgImg"
-        :pointList="mapCarPointCollectionData.pointlist"
-        :distance="mapCarPointCollectionData.distance"
-        :fillColor="mapCarPointCollectionData.fillColor"
-        :fontColor="mapCarPointCollectionData.fontColor"
-        :zIndex="mapCarPointCollectionData.zIndex"
-        :offset="mapCarPointCollectionData.offset"
-      ></MapPointCollection>-->
+      <MapPointCollection
+        :bgImg="mapPointCollectionData.bgCarImg"
+        :pointList="carList"
+        :distance="mapPointCollectionData.distance"
+        :fillColor="mapPointCollectionData.fillColor"
+        :fontColor="mapPointCollectionData.fontColor"
+        :zIndex="mapPointCollectionData.zIndex"
+        :offset="mapPointCollectionData.offset"
+      ></MapPointCollection>
       <!-- pointlist -->
       <!-- 循环使用的方法 -->
       <template v-for="(item,index) of pointlist">
@@ -222,20 +222,21 @@ export default {
       },
       // 自定义图层数据
       mapOverlayData: {
-        // position:  [ 124.82,45.13 ], // 标注中心点 Array, 必须
+        position:  [  ], // 标注中心点 Array, 必须
         // className: 'map-overlay', // 设置自定义图层的class String ，非必须， 默认 'map-overlay'
         // offset:[200,200], // 设置自定义图层的偏移量 Array[number] ，非必须,默认[0, 0]
         // img: require('@/assets/hot.gif') // slot
       },
       // 海量点图层数据
       mapPointCollectionData: {
-        // pointlist: [[126.048289, 45.014299]],
+        pointlist: [],
         distance: 100, // 收起点的间距  number，必须，默认为 40
         zIndex: 500, // 图层z轴高度， 非必须， 默认 400
         offset: [0, 2], // 文字偏移距离 [x,y]， 非必须， 默认 [0,0]
         fontColor: "#ffeb00", // 文字的颜色 string （色彩标识，支持rgba），默认'#fff'(如果去掉文字那么直接rgba透明度设置为0)
         fillColor: "#06d073", // 文字的背景颜色 string（色彩标识，支持rgba），默认'#f00'(如果去不要背景颜色那么直接rgba透明度设置为0)
-        bgImg: require("@/assets/mark.png") // 设置背景图，如果设置了此那么文字背景可以不设置
+        bgImg: require("@/assets/mark.png") ,
+        bgCarImg: require("@/assets/car.png")// 设置背景图，如果设置了此那么文字背景可以不设置
       },
       // 海量点图层数据
       carList: [],
@@ -247,7 +248,7 @@ export default {
       popupText: "弹窗初始化文字",
       iconImg: require("@/assets/mark.png"), // 文件地址 String[url]
       pointlist: [
-        [114.07871607950588, 22.52222782549443]
+        // [114.07871607950588, 22.52222782549443]
         // [ 114.07844961562236, 22.52315316542209 ],
         // [ 114.07696995439895, 22.524754342150676 ],
         // [ 114.08107178741518, 22.524136654355292 ]
@@ -261,9 +262,10 @@ export default {
     value: {
       handler(newVal, oldVal) {
         console.log("newVal", newVal, "oldVal", oldVal);
-        this.mapLineStringData.pointlist = newVal.lineList;
-        this.warningList = newVal.warningList;
-        this.mapPointCollectionData.pointlist = [newVal.position];
+        // this.mapLineStringData.pointlist = newVal.lineList;
+        this.carList=newVal.carList
+        // this.warningList = newVal.warningList;
+        this.mapPointCollectionData.pointlist = newVal.position;
         this.mapPopupClose()
       },
       deep: true

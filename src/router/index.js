@@ -43,6 +43,11 @@ const routes = [
     name: 'Place',
     component: () => import(/* webpackChunkName: "about" */ '../views/place')
   },
+  {
+    path: '/feedback',
+    name: 'Feedback',
+    component: () => import(/* webpackChunkName: "about" */ '../views/feedback')
+  },
 ]
 
 const router = new VueRouter({
