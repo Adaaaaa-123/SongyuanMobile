@@ -1,9 +1,9 @@
 <template class='home'>
   <div class="home">
     <van-tabs type="card" v-model="params.statusCode" @change="changeType">
-      <van-tab title="新预警" name="0"></van-tab>
-      <van-tab title="处置中" name="1"></van-tab>
-      <van-tab title="处置完" name="2"></van-tab>
+      <van-tab title="新预警" :name="0"></van-tab>
+      <van-tab title="处置中" :name="1"></van-tab>
+      <van-tab title="处置完" :name="2"></van-tab>
     </van-tabs>
     <van-overlay :show="loading">
       <van-loading type="spinner" color="#1989fa" />
@@ -13,12 +13,12 @@
       v-for="(item,index) in warnningList"
       :key="item+index"
     >
-      <p>告警类型：{{getCarType(item.carAlarm.vehicleClass)}}</p>
-      <p>告警时间：{{item.carAlarm.passTime.substr(0,19)}}</p>
+      <p>告警类型：{{item.carAlarm&&item.carAlarm.vehicleClass?getCarType(item.carAlarm.vehicleClass):""}}</p>
+      <p>告警时间：{{item.carAlarm&&item.carAlarm.passTime?item.carAlarm.passTime.substr(0,19):""}}</p>
       <div class="address">
         <div class="label">告警地址：</div>
-        <div>{{item.carAlarm.tollgateName}}</div>
-        <div v-if="item.carAlarm.tollgateName" class="place" @click="goPlace(item.id)"></div>
+        <div>{{item.carAlarm&&item.carAlarm.tollgateName?item.carAlarm.tollgateName:""}}</div>
+        <div v-if="item.carAlarm&&item.carAlarm.tollgateName" class="place" @click="goPlace(item.id)"></div>
       </div>
       <p v-if="params.statusCode!=2">签收状态：{{item.status?"已签收":"未签收"}}</p>
       <p v-if="params.statusCode==2">是否误报：{{item.isDistort?"是":"否"}}</p>
@@ -70,7 +70,7 @@ export default {
     return {
       params: {
         carPositionId: "20",
-        statusCode: "0"
+        statusCode: 0
       },
       warnningList: [],
       loading: false,
@@ -182,7 +182,9 @@ export default {
     },
     async getData() {
       this.loading = true;
+      console.log(this.params,'params');
       let res = await getList(this.params);
+      console.log(res,'res');
       if (res.code == 0) {
         this.warnningList = res.object;
       }
@@ -191,24 +193,25 @@ export default {
   }
 };
 </script>
-
+<style>
+.van-tabs__nav--card {
+  margin: 0!important;
+}
+.van-tab.van-tab--active {
+  background-color: #363291!important;
+}
+.van-tabs__nav--card {
+  border-color: #363291!important;
+}
+.van-tabs__nav--card .van-tab {
+  border-color: #363291!important;
+  color: #363291!important;
+}
+.van-tabs__nav--card .van-tab.van-tab--active {
+    color: #fff!important;
+}
+</style>
 <style scoped lang="scss">
-.home /deep/ .van-tabs__nav--card {
-  margin: 0;
-}
-.home /deep/ .van-tab.van-tab--active {
-  background-color: #363291;
-}
-.home /deep/ .van-tabs__nav--card {
-  border-color: #363291;
-}
-.home /deep/ .van-tabs__nav--card .van-tab {
-  border-color: #363291;
-  color: #363291;
-  &.van-tab--active {
-    color: #fff;
-  }
-}
 .home {
   width: 100%;
   padding-bottom: 50px;
