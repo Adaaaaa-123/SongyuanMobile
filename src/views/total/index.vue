@@ -148,22 +148,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.total /deep/ .van-tabs__nav--card {
-  margin: 0;
-}
-.total /deep/ .van-tab.van-tab--active {
-  background-color: #363291;
-}
-.total /deep/ .van-tabs__nav--card {
-  border-color: #363291;
-}
-.total /deep/ .van-tabs__nav--card .van-tab {
-  border-color: #363291;
-  color: #363291;
-  &.van-tab--active {
-    color: #fff;
-  }
-}
 .total {
   .chart {
     // height: 550px;

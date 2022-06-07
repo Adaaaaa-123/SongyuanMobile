@@ -24,7 +24,7 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/',
+  publicPath: './',
   outputDir: 'dist',
   assetsDir: 'static',
   // lintOnSave: process.env.NODE_ENV === 'development',
@@ -41,18 +41,20 @@ module.exports = {
     proxy: {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy  [process.env.VUE_APP_BASE_API]
-      [process.env.VUE_APP_BASE_API]: {
+      '/api': {
         // target: `http://localhost:${port}/mock`,
-        target: 'http://10.216.101.211:10521', // 代理到服务器
+        // target: 'https://10.216.101.228:6868',
+        target: 'http://8.133.168.72:10521', // 代理到服务器
+        // target: 'http://8.133.168.72:10521', // 代理到服务器
         // target: 'http://localhost:8081', // 代理到本地tomcat
         // target: 'http://192.168.0.104:8080', // 代理到公司服务器
         changeOrigin: true,
         secure: false,
-        pathRewrite: {// mock数据时需要把‘/appdemo’去掉
-          // [process.env.VUE_APP_BASE_API]: ''
+        pathRewrite: {
+          '^/api': '/'
         }
       }
-    },
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
@@ -103,7 +105,7 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end()

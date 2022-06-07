@@ -16,13 +16,14 @@ service.interceptors.request.use(
     // config.data = JSON.stringify(config.data);
     // do something before request is sent
     config.headers = {
-      'Content-Type': "application/json" //配置请求头
+      'Content-Type': "application/json", //配置请求头
+      'authorization': localStorage.getItem("token"), //配置请求头
     }
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
+      config.headers['authorization'] = getToken()
     }
     return config
   },

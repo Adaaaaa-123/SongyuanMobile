@@ -33,7 +33,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.set /deep/ .van-switch-cell {
+.set ::deep .van-switch-cell {
   color: #fff;
   background-color: #363291;
 }
