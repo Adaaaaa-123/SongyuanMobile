@@ -1,12 +1,12 @@
 <template>
-  <div class="login">
+  <div class="login" v-loading="loading">
     <h1>处置APP</h1>
-    <van-form @submit="onSubmit">
+    <van-form ref="form">
       <van-field
         v-model="form.username"
         name="用户名"
         label="用户名"
-        placeholder=""
+        placeholder
         :rules="[{ required: true, message: '请填写用户名' }]"
       />
       <van-field
@@ -14,31 +14,101 @@
         type="password"
         name="密码"
         label="密码"
-        placeholder=""
+        placeholder
         :rules="[{ required: true, message: '请填写密码' }]"
       />
+      <van-field
+        v-model="form.result"
+        name="验证码"
+        label="验证码"
+        placeholder
+        :rules="[{ required: true, message: '请填写验证码' }]"
+      />
+      <el-image :src="captchaImg" class="captchaImg" @click="getCaptacha"></el-image>
       <div style="margin: 16px;">
-        <van-button round block type="info" native-type="submit">提交</van-button>
+        <van-button round block type="info" @click="onSubmit">提交</van-button>
       </div>
     </van-form>
   </div>
 </template>
 
 <script>
-import { setToken, getToken } from "@/utils/auth.js";
+import qs from "qs";
+import { loginList, getCaptacha, getUserInfo, executeList } from "@/api/login";
+import { setToken, getToken, removeToken } from "@/utils/auth.js";
 export default {
   name: "Login",
   data() {
     return {
-      form: {}
+      loading: false,
+      captchaImg: "",
+      form: {
+        username: "",
+        password: "",
+        result: "",
+        resultKey: ""
+      }
     };
   },
-  created() {},
+  created() {
+    this.getCaptacha();
+  },
   mounted() {},
   methods: {
+    // 登录
+    async loginList() {
+      this.loading = true;
+      let params = qs.stringify(this.form);
+      let res = await loginList(params);
+      console.log(res, "res");
+      if (res && res.code == 0) {
+
+        this.getUserInfo();
+      } else {
+        this.loading = false;
+        removeToken();
+      }
+    },
+    async getUserInfo() {
+      let res = await getUserInfo();
+      console.log(res, "rs");
+      if (res.code == 0) {
+        localStorage.setItem("userInfo", JSON.stringify(res.data.sysUser));
+        let params = {
+          orgId: res.data.sysUser.orgId,
+          userId: res.data.sysUser.userId
+        };
+        this.executeList(params);
+      } else {
+        this.loading = false;
+      }
+    },
+    // 执行路由规则
+    async executeList(lists) {
+      let res = await executeList(lists);
+      if (res.code == 0) {
+        localStorage.setItem("data", JSON.stringify(res.object));
+        this.$router.push("/home");
+        this.loading = false;
+      } else {
+        this.loading = false;
+      }
+    },
+    async getCaptacha() {
+      let res = await getCaptacha();
+      this.form.resultKey = res.data.data.resultKey;
+      this.form.result = "";
+      this.captchaImg = res.data.data.captchaImg;
+    },
     onSubmit() {
-      setToken("dfdfdsfds");
-      console.log(getToken());
+      this.$refs.form
+        .validate()
+        .then(() => {
+          this.loginList()
+        })
+        .catch(() => {
+          //验证失败
+        });
     }
   }
 };
@@ -54,6 +124,11 @@ export default {
   align-items: center;
   .pd15 {
     margin-top: 10px;
+  }
+  .captchaImg {
+    display: block;
+    margin: auto;
+    margin-top: 8px;
   }
 }
 </style>

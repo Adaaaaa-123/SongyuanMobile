@@ -1,6 +1,7 @@
 import axios from 'axios'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import router from '@/router'
+import { getToken,setToken,removeToken } from '@/utils/auth'
 import { Dialog } from 'vant'
 
 // create an axios instance
@@ -15,15 +16,15 @@ service.interceptors.request.use(
   config => {
     // config.data = JSON.stringify(config.data);
     // do something before request is sent
-    config.headers = {
-      'Content-Type': "application/json", //配置请求头
-      'authorization': localStorage.getItem("token"), //配置请求头
-    }
-    if (store.getters.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['authorization'] = getToken()
+    if (config.url != "captcha" && getToken()) {
+      config.headers = {
+        authorization: getToken(),
+        'Content-Type': "application/json" //配置请求头
+      }
+    } else {
+      config.headers = {
+        'Content-Type': "application/json" //配置请求头
+      }
     }
     return config
   },
@@ -48,15 +49,25 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-
+    if (response.headers.authorization) {
+      if (getToken() != undefined || !getToken())
+        setToken(response.headers.authorization)
+    }
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 0) {
-      Message({
-        message: res.message || 'Error',
+      Dialog.alert({
+        message: res.msg || 'Error',
         type: 'error',
-        duration: 5 * 1000
+        duration: 5 * 100
+      }).then(()=>{
+        location.reload()
       })
-
+      if (res.code == 2001) {
+        removeToken()
+        router.app.$router.push('/login').then(()=>{
+          location.reload()
+        })  
+      }
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
