@@ -30,7 +30,7 @@ service.interceptors.request.use(
   },
   error => {
     // do something with request error
-    console.log(error) // for debug
+    console.log(error,'rq') // for debug
     return Promise.reject(error)
   }
 )
@@ -48,6 +48,7 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
+    console.log(response,'response') // for debug
     const res = response.data
     if (response.headers.authorization) {
       if (getToken() != undefined || !getToken())
@@ -86,10 +87,10 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('error' + error) // for debug
     Dialog.alert({
       title: '提示',
-      message: error.message,
+      message: `error111`,
     }).then(() => {
       return Promise.reject(error)
     });

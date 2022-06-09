@@ -36,6 +36,8 @@
 import qs from "qs";
 import { loginList, getCaptacha, getUserInfo, executeList } from "@/api/login";
 import { setToken, getToken, removeToken } from "@/utils/auth.js";
+import VConsole from "vconsole";
+
 export default {
   name: "Login",
   data() {
@@ -62,7 +64,6 @@ export default {
       let res = await loginList(params);
       console.log(res, "res");
       if (res && res.code == 0) {
-
         this.getUserInfo();
       } else {
         this.loading = false;
@@ -96,15 +97,18 @@ export default {
     },
     async getCaptacha() {
       let res = await getCaptacha();
-      this.form.resultKey = res.data.data.resultKey;
-      this.form.result = "";
-      this.captchaImg = res.data.data.captchaImg;
+      console.log(res,'resssss');
+      if (res.code == 0) {
+        this.form.resultKey = res.data.data.resultKey;
+        this.form.result = "";
+        this.captchaImg = res.data.data.captchaImg;
+      }
     },
     onSubmit() {
       this.$refs.form
         .validate()
         .then(() => {
-          this.loginList()
+          this.loginList();
         })
         .catch(() => {
           //验证失败
