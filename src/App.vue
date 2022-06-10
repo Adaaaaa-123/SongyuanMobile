@@ -39,7 +39,6 @@ html,body{
   height: 100%;
   margin: 0;
 }
-
 #nav {
   padding: 30px;
 

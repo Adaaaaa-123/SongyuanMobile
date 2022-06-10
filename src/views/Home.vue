@@ -8,58 +8,61 @@
     <van-overlay :show="loading">
       <van-loading type="spinner" color="#1989fa" />
     </van-overlay>
-    <div
-      :class="{'item':true,'last':item==5}"
-      v-for="(item,index) in warnningList"
-      :key="item+index"
-    >
-      <p>告警类型：{{item.carAlarm&&item.carAlarm.vehicleClass?getCarType(item.carAlarm.vehicleClass):""}}</p>
-      <p>告警时间：{{item.carAlarm&&item.carAlarm.passTime?item.carAlarm.passTime.substr(0,19):""}}</p>
-      <div class="address">
-        <div class="label">告警地址：</div>
-        <div>{{item.carAlarm&&item.carAlarm.tollgateName?item.carAlarm.tollgateName:""}}</div>
-        <div
-          v-if="item.carAlarm&&item.carAlarm.tollgateName"
-          class="place"
-          @click="goPlace(item.id)"
-        ></div>
+    <van-list v-model="loadingList" :finished="finished" finished-text="没有更多了" @load="onRefresh">
+      <div
+        :class="{'item':true,'last':item==5,'van-clearfix':true}"
+        v-for="(item,index) in warnningList"
+        :key="item+index"
+      >
+        <p>告警类型：{{item.carAlarm&&item.carAlarm.vehicleClass?getCarType(item.carAlarm.vehicleClass):""}}</p>
+        <p>告警时间：{{item.carAlarm&&item.carAlarm.passTime?item.carAlarm.passTime.substr(0,19):""}}</p>
+        <div class="address">
+          <div class="label">告警地址：</div>
+          <div>{{item.carAlarm&&item.carAlarm.tollgateName?item.carAlarm.tollgateName:""}}</div>
+          <div
+            v-if="item.carAlarm&&item.carAlarm.tollgateName"
+            class="place"
+            @click="goPlace(item.id)"
+          ></div>
+        </div>
+        <p v-if="params.statusCode!=2">签收状态：{{item.status?"已签收":"未签收"}}</p>
+        <p v-if="params.statusCode==2">是否误报：{{item.isDistort?"是":"否"}}</p>
+        <div v-if="params.statusCode=='0'" class="mark"></div>
+        <div v-if="params.statusCode=='1'" class="mark yellow"></div>
+        <div v-if="params.statusCode=='2'" class="mark green"></div>
+        <div class="btns">
+          操作：
+          <van-button
+            size="mini"
+            v-if="params.statusCode=='1'&&!item.status"
+            color="#363291"
+            type="info"
+            @click="goReceipt(item.id)"
+          >签收</van-button>
+          <van-button
+            size="mini"
+            v-if="params.statusCode=='1'&&item.status"
+            color="#363291"
+            type="info"
+            @click="goFeedback(item)"
+          >处置</van-button>
+          <van-button
+            size="mini"
+            v-if="params.statusCode=='1'&&item.status"
+            color="#363291"
+            type="info"
+            @click="goDistort(item.carAlarm.id)"
+          >误报</van-button>
+          <van-button
+            size="mini"
+            color="#363291"
+            type="info"
+            @click="viewPicture(item.carAlarm.storageUrl)"
+          >查看图片</van-button>
+        </div>
       </div>
-      <p v-if="params.statusCode!=2">签收状态：{{item.status?"已签收":"未签收"}}</p>
-      <p v-if="params.statusCode==2">是否误报：{{item.isDistort?"是":"否"}}</p>
-      <div v-if="params.statusCode=='0'" class="mark"></div>
-      <div v-if="params.statusCode=='1'" class="mark yellow"></div>
-      <div v-if="params.statusCode=='2'" class="mark green"></div>
-      <div class="btns">
-        操作：
-        <van-button
-          size="mini"
-          v-if="params.statusCode=='1'&&!item.status"
-          color="#363291"
-          type="info"
-          @click="goReceipt(item.id)"
-        >签收</van-button>
-        <van-button
-          size="mini"
-          v-if="params.statusCode=='1'&&item.status"
-          color="#363291"
-          type="info"
-          @click="goFeedback(item)"
-        >处置</van-button>
-        <van-button
-          size="mini"
-          v-if="params.statusCode=='1'&&item.status"
-          color="#363291"
-          type="info"
-          @click="goDistort(item.carAlarm.id)"
-        >误报</van-button>
-        <van-button
-          size="mini"
-          color="#363291"
-          type="info"
-          @click="viewPicture(item.carAlarm.storageUrl)"
-        >查看图片</van-button>
-      </div>
-    </div>
+    </van-list>
+
     <van-image-preview v-model="show" :images="images" @onClose="closeView" @change="onChange">
       <van-button type="warning" @click="go">误报</van-button>
     </van-image-preview>
@@ -74,18 +77,23 @@ export default {
     return {
       params: {
         carPositionId: "28",
-        statusCode: 1
+        statusCode: 1,
+        pageNum: 1,
+        pageSize: 6,
+        total: 0
       },
       warnningList: [],
       loading: false,
       images: [],
-      show: false
+      show: false,
+      loadingList: false,
+      finished: false
     };
   },
-  created() {
-    this.getData();
+  created() {},
+  mounted() {
+    // this.getData();
   },
-  mounted() {},
   methods: {
     go() {},
     goFeedback(params) {
@@ -157,6 +165,8 @@ export default {
       }
     },
     changeType(val) {
+      this.params.pageSize = 6
+      this.finished =false
       this.getData();
     },
     getCarType(type) {
@@ -185,15 +195,23 @@ export default {
       }
       return current;
     },
+    onRefresh() {
+      this.loadingList = true;
+      this.params.pageSize += 6;
+      this.getData();
+    },
     async getData() {
-      this.loading = true;
       console.log(this.params, "params");
       let res = await getList(this.params);
-      console.log(res, "res");
       if (res.code == 0) {
-        this.warnningList = res.object;
+        this.warnningList = res.object.data;
+        if (res.object.data.length >= res.object.total) {
+           console.log(res, "相等", res.object.data.length, res.object.total);
+          this.finished = true;
+        }
+        console.log(res, "res", res.object.data.length, res.object.total);
       }
-      this.loading = false;
+      this.loadingList = false;
     }
   }
 };
@@ -218,6 +236,7 @@ export default {
 </style>
 <style scoped lang="scss">
 .home {
+  height: 100vh;
   width: 100%;
   padding-bottom: 50px;
   background-color: #e1e0f1;
